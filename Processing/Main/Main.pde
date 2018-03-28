@@ -33,3 +33,37 @@
  *               DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
  *               OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+ 
+ public void settings() {
+  size(1280, 800, P3D);
+  //fullScreen(P3D);
+}
+
+// Runs once when application begins
+//
+void setup() {
+  
+}
+
+// Runs on a infinite loop after setup
+//
+void draw() {
+  if (!initialized) {
+    
+    // A_Init.pde - runs until initialized = true
+    //
+    init();
+    
+  } else {
+    
+    // A_Listen.pde - Updates settings and values for this frame
+    //
+    listen();
+    
+    // A_Render.pde - Renders current frame of visualization
+    //
+    background(0);
+    render3D();
+    render2D();
+  }
+}
