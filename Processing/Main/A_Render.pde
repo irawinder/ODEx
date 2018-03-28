@@ -57,13 +57,23 @@ void render3D() {
   // Draw and Calculate 3D Graphics 
   cam.on();
 
-  // Field: Draw Rectangular plane comprising boundary area 
-  fill(255, 50);
-  rect(0, 0, B.x, B.y);
+  //// Field: Draw Rectangular plane comprising boundary area 
+  //fill(255, 50);
+  //rect(0, 0, B.x, B.y);
   
-  // Field: Draw Selection Field
+  //// Field: Draw Selection Field
+  //pushMatrix(); translate(0, 0, 1);
+  //image(cam.chunkField.img, 0, 0, B.x, B.y);
+  //popMatrix();
+  
   pushMatrix(); translate(0, 0, 1);
-  image(cam.chunkField.img, 0, 0, B.x, B.y);
+  fill(255, 100); stroke(255);
+  float diam = 10*pow(cam.zoom+1, 2);
+  for (District d: districts) {
+    float x = d.location.x;
+    float y = d.location.y;
+    ellipse(x, y, diam, diam);
+  }
   popMatrix();
   
 }

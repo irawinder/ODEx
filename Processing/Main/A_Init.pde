@@ -20,8 +20,16 @@
  *               DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
  *               OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
- // Camera Object with built-in GUI for navigation and selection
+
+// Data Objects for loading and storing Origin-Destination (OD) Data
+//
+Table od_nodes, od_pairs;
+ArrayList<District> districts;
+
+//  GeoLocation Parameters:
+float latCtr, lonCtr, bound, latMin, latMax, lonMin, lonMax;
+
+// Camera Object with built-in GUI for navigation and selection
 //
 Camera cam;
 PVector B; // Bounding Box for 3D Environment
@@ -36,12 +44,14 @@ Button simButton;
 PFont f12, f18, f24;
 
 // Counter to track which phase of initialization
+//
 boolean initialized;
 int initPhase = 0;
 int phaseDelay = 0;
 String status[] = {
   "Initializing Canvas ...",
   "Initializing Toolbars and 3D Environment ...",
+  "Loading OD Data ...",
   "Ready to go!"
 };
 int NUM_PHASES = status.length;
@@ -76,6 +86,12 @@ void init() {
     
   } else if (initPhase == 2) {
     
+    // Load OD Data
+    //
+    initOD();
+    
+  } else if (initPhase == 3) {
+    
     initialized = true;
   }
   
@@ -98,8 +114,8 @@ void initCamera() {
     cam.ZOOM_DEFAULT = 0.80;
     cam.ZOOM_POW     = 2.50;
     cam.ZOOM_MAX     = 0.05;
-    cam.ZOOM_MIN     = 1.00;
-    cam.ROTATION_DEFAULT = 0.0; // (0 - 2*PI)
+    cam.ZOOM_MIN     = 1.80;
+    cam.ROTATION_DEFAULT = PI; // (0 - 2*PI)
     cam.enableChunks = false;  // Enable/Disable 3D mouse cursor field for continuous object placement
     cam.init(); //Must End with init() if any variables within Camera() are changed from default
     cam.off(); // turn cam off while still initializing
@@ -116,20 +132,57 @@ void initToolbars() {
   // Left Toolbar
   bar_left = new Toolbar(BAR_X, BAR_Y, BAR_W, BAR_H, MARGIN);
   bar_left.title = "ODEx Beta 0.9";
-  bar_left.credit = "";
-  bar_left.explanation = "";
+  bar_left.credit = "\n\n";
+  bar_left.explanation = "Use ODEx (Origin-Destination Explorer) for preliminary exploration of an OD data set." + 
+                         "\n\nTo view your own data set, locate the 'data/' folder and replace 'nodes.csv' and 'od_pairs.csv' using the example data format.";
   bar_left.controlY = BAR_Y + bar_left.margin + int(1.5*bar_left.CONTROL_H);
   
-  bar_left.addSlider("Slider 1",            "", 0,  20, 10, 'q', 'w', false);
-  bar_left.addSlider("Slider 2",            "", 0,  20, 10, 'q', 'w', false);
+  //bar_left.addSlider("Slider 1",            "", 0,  20, 10, 'q', 'w', false);
+  //bar_left.addSlider("Slider 2",            "", 0,  20, 10, 'q', 'w', false);
   
   // Right Toolbar
   bar_right = new Toolbar(width - (BAR_X + BAR_W), BAR_Y, BAR_W, BAR_H, MARGIN);
-  bar_right.title = "";
+  bar_right.title = "Summary";
   bar_right.credit = "";
   bar_right.explanation = "";
   bar_right.controlY = BAR_Y + bar_right.margin + 2*bar_right.CONTROL_H;
   
-  bar_right.addSlider("Slider 3", "",  1,  100, 1, 'q', 'w', false);
-  bar_right.addButton("Radio Button 1", 200, true, '1');
+  //bar_right.addSlider("Slider 3", "",  1,  100, 1, 'q', 'w', false);
+  //bar_right.addButton("Radio Button 1", 200, true, '1');
+}
+
+void initOD() {
+  
+  //  Parameter Space for Geometric Area (Beijing)
+  //
+  latCtr = +39.9042;
+  lonCtr = +116.4047;
+  bound    =  0.200;
+  latMin = latCtr - bound;
+  latMax = latCtr + bound;
+  lonMin = lonCtr - bound;
+  lonMax = lonCtr + bound;
+    
+  districts = new ArrayList<District>();
+  od_nodes = loadTable("nodes.csv", "header");
+  for (int i=0; i<od_nodes.getRowCount(); i++) {
+    District d = new District();
+    d.ID = od_nodes.getInt(i, "districtID");
+    d.latlon.x = od_nodes.getFloat(i, "Latitude");
+    d.latlon.y = od_nodes.getFloat(i, "Longitude");
+    d.location = latlonToXY(d.latlon, latMin, latMax, lonMin, lonMax, 0, 0, B.x, B.y);
+    districts.add(d);
+  }
+  println(districts.size() + " nodes loaded");
+}
+
+// Converts latitude, longitude to local friendly screen units (2D or 3D)
+PVector latlonToXY(PVector latlon, float latMin, float latMax, float lonMin, float lonMax, float xMin, float yMin, float xMax, float yMax) {
+  float X_Width = xMax - xMin;
+  float Y_Width = yMax - yMin;
+  float lat_scaler = (latlon.x - latMin) / abs(latMax - latMin);
+  float lon_scaler = (latlon.y - lonMin) / abs(lonMax - lonMin);
+  float X  = xMin + X_Width * lon_scaler;
+  float Y  = yMin - Y_Width * lat_scaler + Y_Width;
+  return new PVector(X,Y);
 }
