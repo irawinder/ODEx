@@ -37,7 +37,7 @@ float latCtr, lonCtr, bound, latMin, latMax, lonMin, lonMax;
 float countMinThreshold;
 float countMaxThreshold;
 float countScaler;
-boolean showID, showIntraNodal, showInterNodal, showRoads;
+boolean showID, showIntraNodal, showInterNodal, showRoads, edges3d;
 
 // Camera Object with built-in GUI for navigation and selection
 //
@@ -85,7 +85,7 @@ void init() {
     
     // Create canvas for drawing everything to earth surface
     //
-    B = new PVector(1000, 1000, 0);
+    B = new PVector(1000, 1000, 100);
     
   } else if (initPhase == 1) {
     
@@ -133,7 +133,7 @@ void initCamera() {
     cam.Y_DEFAULT    = 580;
     cam.ZOOM_DEFAULT = 1.50;
     cam.ZOOM_POW     = 2.50;
-    cam.ZOOM_MAX     = 0.05;
+    cam.ZOOM_MAX     = 0.25;
     cam.ZOOM_MIN     = 1.80;
     cam.ROTATION_DEFAULT = PI; // (0 - 2*PI)
     cam.enableChunks = false;  // Enable/Disable 3D mouse cursor field for continuous object placement
@@ -155,22 +155,23 @@ void initToolbars() {
   bar_left.credit = "\nHuman Dynamics";
   bar_left.explanation = "\n\nUse ODEx (Origin-Destination Explorer) for preliminary exploration of an OD data set." + 
                          "\n\nTo view your own data set, locate the 'data/' folder and replace 'nodes.csv' and 'od_pairs.csv' using the example data format." +
-                         "\n\nThresholds: Use 'q', 'w', 'a', and 's' keys to fine-tune thresholds for which to display counts:" +
-                         "\n\nThe area of lines an circles is proportion to the total counts represented.";
+                         "\n\nThe area of lines an circles is proportion to the total counts represented." +
+                         "\n\nThresholds: Use 'q', 'w', 'a', and 's' keys to fine-tune thresholds for which to display counts:";
   bar_left.controlY = BAR_Y + bar_left.margin + int(11*bar_left.CONTROL_H);
   
-  bar_left.addSlider("Minimim Count Threshold", "",     0,  int(maxCount),        0, 'q', 'w', true);
+  bar_left.addSlider("Minimim Count Threshold", "",     0,  int(maxCount),             5, 'q', 'w', true);
   bar_left.addSlider("Maximum Count Threshold", "",     0,  int(maxCount), int(maxCount), 'a', 's', true);
-  bar_left.addSlider("Visualization Scaler",    "",   -100,             100,        0, 'z', 'x', false);
+  bar_left.addSlider("Visualization Scaler",    "",   -100,             100,           0, 'z', 'x', false);
   
-  bar_left.addButton("Show Stationary Commutes"   ,   200, true, '1');
-  bar_left.addButton("Show Dynamic Commutes"      ,   200, true, '2');
+  bar_left.addButton("Show Stationary Commutes"   ,   #FF00FF, true, '1');
+  bar_left.addButton("Show Dynamic Commutes"      ,   #00FF00, true, '2');
   bar_left.addButton("Show Node IDs"              ,   200, false, '3');
   bar_left.addButton("Show Roads"                 ,   200, true, '4');
+  bar_left.addButton("3D Edges"                   ,   200, true, '5');
   
   // Right Toolbar
   bar_right = new Toolbar(width - (BAR_X + BAR_W), BAR_Y, BAR_W, BAR_H, MARGIN);
-  bar_right.title = "Summary";
+  bar_right.title = "Summary / Analytics (TBA)";
   bar_right.credit = "";
   bar_right.explanation = "";
   bar_right.controlY = BAR_Y + bar_right.margin + 2*bar_right.CONTROL_H;

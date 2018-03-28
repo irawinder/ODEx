@@ -38,6 +38,7 @@ void listen() {
   showInterNodal = bar_left.buttons.get(1).value;
   showID    = bar_left.buttons.get(2).value;
   showRoads = bar_left.buttons.get(3).value;
+  edges3d   = bar_left.buttons.get(4).value;
 }
 
 void mousePressed() {

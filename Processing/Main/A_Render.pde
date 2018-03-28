@@ -86,16 +86,36 @@ void render3D() {
         
         float distance = O.dist(D);
         float weight = countScaler*c.count/distance;
-        float alpha = 150;
-        stroke(255, alpha); strokeWeight(weight);
-        line(O.x, O.y, D.x, D.y);
+        float alpha = 100;
+        stroke(#00FF00, alpha); strokeWeight(weight);  noFill();
+        if (edges3d) {
+          
+          int SEGMENTS = 10;
+          PVector increment = new PVector(D.x, D.y);
+          increment.sub(O);
+          increment.mult(1.0 / SEGMENTS);
+          
+          float dist = O.dist(D);
+          
+          PVector p1;
+          p1 = new PVector(O.x, O.y);
+          beginShape();
+          for (int i=0; i<SEGMENTS; i++) {
+            vertex(p1.x, p1.y, 0.25*dist*sin(i*PI/SEGMENTS));
+            p1.add(increment);
+          }
+          endShape();
+          
+        } else {
+          line(O.x, O.y, D.x, D.y);
+        }
         
       // Draw INTRA-nodal Trip
       //
       } else if (c.origin.ID == c.destination.ID  && showIntraNodal) {
         float weight = countScaler*c.count;
         float diam = 2*sqrt(weight/PI);
-        fill(255, 100); noStroke();
+        fill(#FF00FF, 100); noStroke();
         ellipse(O.x, O.y, diam, diam);
       }
     }
@@ -106,7 +126,7 @@ void render3D() {
   //
   if (showID) {
     pushMatrix(); translate(0, 0, 2);
-    stroke(#FF00FF, 150); strokeWeight(1); noFill(); textAlign(CENTER, CENTER);
+    stroke(255, 150); strokeWeight(1); noFill(); textAlign(CENTER, CENTER);
     //float diam = 15*pow(cam.zoom+1, 2);
     float diam = 32;
     for (District d: districts) {
