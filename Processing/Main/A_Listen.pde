@@ -91,6 +91,9 @@ void keyPressed() {
         println("cam.zoom = "     + cam.zoom);
         println("cam.rotation = " + cam.rotation);
         break;
+      case 'h':
+        showBar = !showBar;
+        break;
     }
   }
 }

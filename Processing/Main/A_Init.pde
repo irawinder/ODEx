@@ -49,7 +49,7 @@ int MARGIN = 25; // Pixel margin allowed around edge of screen
 //
 Toolbar bar_left, bar_right; 
 int BAR_X, BAR_Y, BAR_W, BAR_H;
-Button simButton;
+boolean showBar;
 
 PFont f12, f18, f24;
 
@@ -57,7 +57,7 @@ PFont f12, f18, f24;
 //
 boolean initialized;
 int initPhase = 0;
-int phaseDelay = 0;
+int phaseDelay = 1000;
 String status[] = {
   "Initializing Canvas ...",
   "Loading OD Data ...",
@@ -107,6 +107,7 @@ void init() {
     
     // Initialize GUI3D
     //
+    showBar = true;
     initToolbars();
     initCamera();
     
@@ -163,9 +164,9 @@ void initToolbars() {
   bar_left.addSlider("Maximum Count Threshold", "",     0,  int(maxCount), int(maxCount), 'a', 's', true);
   bar_left.addSlider("Visualization Scaler",    "",   -100,             100,           0, 'z', 'x', false);
   
-  bar_left.addButton("Show Stationary Commutes"   ,   #FF00FF, true, '1');
-  bar_left.addButton("Show Dynamic Commutes"      ,   #00FF00, true, '2');
-  bar_left.addButton("Show Node IDs"              ,   200, false, '3');
+  bar_left.addButton("Show Stationary Commutes"   ,   255, true, '1');
+  bar_left.addButton("Show Dynamic Commutes"      ,   #00AA00, true, '2');
+  bar_left.addButton("Show Node IDs"              ,   200, true, '3');
   bar_left.addButton("Show Roads"                 ,   200, true, '4');
   bar_left.addButton("3D Edges"                   ,   200, true, '5');
   
@@ -173,7 +174,16 @@ void initToolbars() {
   bar_right = new Toolbar(width - (BAR_X + BAR_W), BAR_Y, BAR_W, BAR_H, MARGIN);
   bar_right.title = "Summary / Analytics (TBA)";
   bar_right.credit = "";
-  bar_right.explanation = "";
+  bar_right.explanation = "\n\nTODO:" +
+                          "\n\n1. Option to Animate Edges (show directionality)" +
+                          "\n\n2. Isolate display to single node's connections" +
+                          "\n\n3. Import Road Information for visual reference" +
+                          "\n\n4. Use Roads for Agent Pathfinding" +
+                          "\n\n5. Allow clustering of nodes into psuedo-locations based on connectivity (like MITeams)" +
+                          "\n\n6. Incorporate Household Income and Economic Indicator Data" +
+                          "\n\n7. Automate camera position and scaling for arbirarily located data" +
+                          "\n\n8. More intuitive CSV data input";
+                          
   bar_right.controlY = BAR_Y + bar_right.margin + 2*bar_right.CONTROL_H;
   
   //bar_right.addSlider("Slider 3", "",  1,  100, 1, 'q', 'w', false);

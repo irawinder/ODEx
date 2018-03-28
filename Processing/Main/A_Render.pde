@@ -28,13 +28,17 @@ void render2D() {
   hint(DISABLE_DEPTH_TEST);
   cam.off();
   
-  // Draw Slider Bars for Controlling Zoom and Rotation (2D canvas begins)
-  cam.drawControls();
-
-  // Draw Margin ToolBar
-  //
-  bar_left.draw();
-  bar_right.draw();
+  if (showBar) {
+    
+    // Draw Slider Bars for Controlling Zoom and Rotation (2D canvas begins)
+    cam.drawControls();
+    
+    // Draw Margin ToolBar
+    //
+    bar_left.draw();
+    bar_right.draw();
+    
+  }
   
 }
 
@@ -87,7 +91,7 @@ void render3D() {
         float distance = O.dist(D);
         float weight = countScaler*c.count/distance;
         float alpha = 100;
-        stroke(#00FF00, alpha); strokeWeight(weight);  noFill();
+        stroke(#00AA00, alpha); strokeWeight(weight);  noFill();
         if (edges3d) {
           
           int SEGMENTS = 10;
@@ -101,7 +105,7 @@ void render3D() {
           p1 = new PVector(O.x, O.y);
           beginShape();
           for (int i=0; i<SEGMENTS; i++) {
-            vertex(p1.x, p1.y, 0.25*dist*sin(i*PI/SEGMENTS));
+            vertex(p1.x, p1.y, 0.25*dist*sin((i+0.01)*PI/SEGMENTS));
             p1.add(increment);
           }
           endShape();
@@ -115,7 +119,7 @@ void render3D() {
       } else if (c.origin.ID == c.destination.ID  && showIntraNodal) {
         float weight = countScaler*c.count;
         float diam = 2*sqrt(weight/PI);
-        fill(#FF00FF, 100); noStroke();
+        fill(255, 100); noStroke();
         ellipse(O.x, O.y, diam, diam);
       }
     }
@@ -126,7 +130,7 @@ void render3D() {
   //
   if (showID) {
     pushMatrix(); translate(0, 0, 2);
-    stroke(255, 150); strokeWeight(1); noFill(); textAlign(CENTER, CENTER);
+    stroke(255, 50); strokeWeight(1); noFill(); textAlign(CENTER, CENTER);
     //float diam = 15*pow(cam.zoom+1, 2);
     float diam = 32;
     for (District d: districts) {
