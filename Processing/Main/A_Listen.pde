@@ -23,6 +23,21 @@
  
 void listen() {
   
+  countMinThreshold = bar_left.sliders.get(0).value;
+  countMaxThreshold = bar_left.sliders.get(1).value;
+  
+  if (bar_left.sliders.get(2).value > 0) {
+    countScaler = bar_left.sliders.get(2).value;
+  } else if (bar_left.sliders.get(2).value < 0) {
+    countScaler = 1.0 / abs(bar_left.sliders.get(2).value);
+  } else {
+    countScaler = 1;
+  }
+  
+  showIntraNodal = bar_left.buttons.get(0).value;
+  showInterNodal = bar_left.buttons.get(1).value;
+  showID    = bar_left.buttons.get(2).value;
+  showRoads = bar_left.buttons.get(3).value;
 }
 
 void mousePressed() {

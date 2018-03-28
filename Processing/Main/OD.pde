@@ -38,7 +38,7 @@ class OD_Pair {
   // Nodes of origin-destination (OD)
   OD_Node origin, destination;
   
-  // Amount of trip counts between origin and destination nodes
+  // Amount of aggregated trip counts between origin and destination nodes
   // Specify the units of time interval (i.e. 2 months)
   //
   float count;

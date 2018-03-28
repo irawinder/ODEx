@@ -58,23 +58,65 @@ void render3D() {
   cam.on();
 
   //// Field: Draw Rectangular plane comprising boundary area 
+  ////
   //fill(255, 50);
   //rect(0, 0, B.x, B.y);
   
   //// Field: Draw Selection Field
+  ////
   //pushMatrix(); translate(0, 0, 1);
   //image(cam.chunkField.img, 0, 0, B.x, B.y);
   //popMatrix();
   
+  // Draw Commute "Edges"
+  //
   pushMatrix(); translate(0, 0, 1);
-  fill(255, 100); stroke(255);
-  float diam = 10*pow(cam.zoom+1, 2);
-  for (District d: districts) {
-    float x = d.location.x;
-    float y = d.location.y;
-    ellipse(x, y, diam, diam);
+  fill(255, 100); stroke(255, 200);
+  for (Commute c: commutes) {
+    
+    // Only Display Edges within User-defined thresholds
+    if (c.count >= countMinThreshold && c.count <= countMaxThreshold) {
+      
+      PVector O = c.origin.location;
+      PVector D = c.destination.location;
+      
+      // Draw INTER-nodal trip
+      //
+      if (c.origin.ID != c.destination.ID  && showInterNodal) {
+        
+        float distance = O.dist(D);
+        float weight = countScaler*c.count/distance;
+        float alpha = 150;
+        stroke(255, alpha); strokeWeight(weight);
+        line(O.x, O.y, D.x, D.y);
+        
+      // Draw INTRA-nodal Trip
+      //
+      } else if (c.origin.ID == c.destination.ID  && showIntraNodal) {
+        float weight = countScaler*c.count;
+        float diam = 2*sqrt(weight/PI);
+        fill(255, 100); noStroke();
+        ellipse(O.x, O.y, diam, diam);
+      }
+    }
   }
   popMatrix();
+  
+  // Draw District Centroids
+  //
+  if (showID) {
+    pushMatrix(); translate(0, 0, 2);
+    stroke(#FF00FF, 150); strokeWeight(1); noFill(); textAlign(CENTER, CENTER);
+    //float diam = 15*pow(cam.zoom+1, 2);
+    float diam = 32;
+    for (District d: districts) {
+      float x = d.location.x;
+      float y = d.location.y;
+      rect(x-diam/2, y-diam/2, diam, diam);
+      fill(255); text(d.ID, x, y); noFill();
+    }
+    popMatrix();
+  }
   
 }
 

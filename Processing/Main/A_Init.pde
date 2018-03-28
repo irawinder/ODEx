@@ -25,9 +25,19 @@
 //
 Table od_nodes, od_pairs;
 ArrayList<District> districts;
+ArrayList<Commute>  commutes;
+HashMap<Integer, District> districtHash;
+float maxCount;
 
 //  GeoLocation Parameters:
 float latCtr, lonCtr, bound, latMin, latMax, lonMin, lonMax;
+
+// Count Thresholds - Minimum and Maximum counts before displaying an OD pair
+//
+float countMinThreshold;
+float countMaxThreshold;
+float countScaler;
+boolean showID, showIntraNodal, showInterNodal, showRoads;
 
 // Camera Object with built-in GUI for navigation and selection
 //
@@ -50,8 +60,8 @@ int initPhase = 0;
 int phaseDelay = 0;
 String status[] = {
   "Initializing Canvas ...",
-  "Initializing Toolbars and 3D Environment ...",
   "Loading OD Data ...",
+  "Initializing Toolbars and 3D Environment ...",
   "Ready to go!"
 };
 int NUM_PHASES = status.length;
@@ -75,20 +85,30 @@ void init() {
     
     // Create canvas for drawing everything to earth surface
     //
-    B = new PVector(3000, 3000, 0);
+    B = new PVector(1000, 1000, 0);
     
   } else if (initPhase == 1) {
+    
+    // Init OD Viewing Parameters
+    // 
+    countMinThreshold = 0;
+    countMaxThreshold = Float.POSITIVE_INFINITY;
+    countScaler = 0;
+    showInterNodal = true;
+    showIntraNodal = true;
+    showID = true;
+    showRoads = true;
+    
+    // Load OD Data
+    //
+    initOD();
+    
+  } else if (initPhase == 2) {
     
     // Initialize GUI3D
     //
     initToolbars();
     initCamera();
-    
-  } else if (initPhase == 2) {
-    
-    // Load OD Data
-    //
-    initOD();
     
   } else if (initPhase == 3) {
     
@@ -109,9 +129,9 @@ void initCamera() {
     // eX, eW (extentsX ...) prevents accidental dragging when interactiong with toolbar
     cam.eX = bar_left.barX + bar_left.barW;
     cam.eW = width - (bar_left.barW + bar_right.barW + 2*MARGIN);
-    cam.X_DEFAULT    = 0;
-    cam.Y_DEFAULT    = 200;
-    cam.ZOOM_DEFAULT = 0.80;
+    cam.X_DEFAULT    = -86;
+    cam.Y_DEFAULT    = 580;
+    cam.ZOOM_DEFAULT = 1.50;
     cam.ZOOM_POW     = 2.50;
     cam.ZOOM_MAX     = 0.05;
     cam.ZOOM_MIN     = 1.80;
@@ -132,13 +152,21 @@ void initToolbars() {
   // Left Toolbar
   bar_left = new Toolbar(BAR_X, BAR_Y, BAR_W, BAR_H, MARGIN);
   bar_left.title = "ODEx Beta 0.9";
-  bar_left.credit = "\n\n";
-  bar_left.explanation = "Use ODEx (Origin-Destination Explorer) for preliminary exploration of an OD data set." + 
-                         "\n\nTo view your own data set, locate the 'data/' folder and replace 'nodes.csv' and 'od_pairs.csv' using the example data format.";
-  bar_left.controlY = BAR_Y + bar_left.margin + int(1.5*bar_left.CONTROL_H);
+  bar_left.credit = "\nHuman Dynamics";
+  bar_left.explanation = "\n\nUse ODEx (Origin-Destination Explorer) for preliminary exploration of an OD data set." + 
+                         "\n\nTo view your own data set, locate the 'data/' folder and replace 'nodes.csv' and 'od_pairs.csv' using the example data format." +
+                         "\n\nThresholds: Use 'q', 'w', 'a', and 's' keys to fine-tune thresholds for which to display counts:" +
+                         "\n\nThe area of lines an circles is proportion to the total counts represented.";
+  bar_left.controlY = BAR_Y + bar_left.margin + int(11*bar_left.CONTROL_H);
   
-  //bar_left.addSlider("Slider 1",            "", 0,  20, 10, 'q', 'w', false);
-  //bar_left.addSlider("Slider 2",            "", 0,  20, 10, 'q', 'w', false);
+  bar_left.addSlider("Minimim Count Threshold", "",     0,  int(maxCount),        0, 'q', 'w', true);
+  bar_left.addSlider("Maximum Count Threshold", "",     0,  int(maxCount), int(maxCount), 'a', 's', true);
+  bar_left.addSlider("Visualization Scaler",    "",   -100,             100,        0, 'z', 'x', false);
+  
+  bar_left.addButton("Show Stationary Commutes"   ,   200, true, '1');
+  bar_left.addButton("Show Dynamic Commutes"      ,   200, true, '2');
+  bar_left.addButton("Show Node IDs"              ,   200, false, '3');
+  bar_left.addButton("Show Roads"                 ,   200, true, '4');
   
   // Right Toolbar
   bar_right = new Toolbar(width - (BAR_X + BAR_W), BAR_Y, BAR_W, BAR_H, MARGIN);
@@ -162,8 +190,11 @@ void initOD() {
   latMax = latCtr + bound;
   lonMin = lonCtr - bound;
   lonMax = lonCtr + bound;
-    
+  
+  //  Initialize Districts (i.e. i.e. Nodes)
+  //
   districts = new ArrayList<District>();
+  districtHash = new HashMap<Integer, District>();
   od_nodes = loadTable("nodes.csv", "header");
   for (int i=0; i<od_nodes.getRowCount(); i++) {
     District d = new District();
@@ -172,8 +203,31 @@ void initOD() {
     d.latlon.y = od_nodes.getFloat(i, "Longitude");
     d.location = latlonToXY(d.latlon, latMin, latMax, lonMin, lonMax, 0, 0, B.x, B.y);
     districts.add(d);
+    districtHash.put(d.ID, d);
   }
   println(districts.size() + " nodes loaded");
+  
+  //  Initialize Commutes (i.e. Edges)
+  //
+  commutes = new ArrayList<Commute>();
+  od_pairs = loadTable("od_pairs.csv", "header");
+  maxCount = 0;
+  for (int i=0; i<od_pairs.getRowCount(); i++) {
+    
+    int originID      = od_pairs.getInt(i, 0);
+    int destinationID = od_pairs.getInt(i, 1);
+    float count       = od_pairs.getFloat(i, 2);
+    
+    Commute c = new Commute();
+    c.origin      = districtHash.get(originID);
+    c.destination = districtHash.get(destinationID);
+    c.count       = count;
+    
+    if (count > maxCount) maxCount = count;
+    
+    commutes.add(c);
+  }
+  println(commutes.size() + " aggregated OD pairs loaded");
 }
 
 // Converts latitude, longitude to local friendly screen units (2D or 3D)
