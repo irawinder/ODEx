@@ -1,6 +1,8 @@
 # ODEx
 ODEx (Origin-Destination Explorer) is tool for visualization and exploration of origin-destination (OD) data.
 
+![ODEx by Ira Winder](Processing/Main/data/loadingScreen.jpg?raw=true "Origin Destination Explorer by Ira Winder")
+
 ## How to Use
 
 1. Make sure you have installed the latest version of [Java](https://www.java.com/verify/)
