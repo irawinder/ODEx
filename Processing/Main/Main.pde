@@ -34,7 +34,7 @@
  *               OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
  
- public void settings() {
+public void settings() {
   //size(1280, 800, P3D);
   fullScreen(P3D);
 }

@@ -123,23 +123,29 @@ void init() {
 }
 
 void initCamera() {
-  // Initialize the Camera
-    // cam = new Camera(toolbar_width, b, -350, 50, 0.7, 0.1, 2.0, 0.45);
-    // Initialize 3D World Camera Defaults
-    cam = new Camera (B, MARGIN);
-    // eX, eW (extentsX ...) prevents accidental dragging when interactiong with toolbar
-    cam.eX = bar_left.barX + bar_left.barW;
-    cam.eW = width - (bar_left.barW + bar_right.barW + 2*MARGIN);
-    cam.X_DEFAULT    = -86;
-    cam.Y_DEFAULT    = 580;
-    cam.ZOOM_DEFAULT = 1.50;
-    cam.ZOOM_POW     = 2.50;
-    cam.ZOOM_MAX     = 0.25;
-    cam.ZOOM_MIN     = 1.80;
-    cam.ROTATION_DEFAULT = PI; // (0 - 2*PI)
-    cam.enableChunks = false;  // Enable/Disable 3D mouse cursor field for continuous object placement
-    cam.init(); //Must End with init() if any variables within Camera() are changed from default
-    cam.off(); // turn cam off while still initializing
+  // Initialize 3D World Camera Defaults
+  //
+  cam = new Camera (B, MARGIN);
+  cam.X_DEFAULT    = -86;
+  cam.Y_DEFAULT    = 580;
+  cam.ZOOM_DEFAULT = 1.50;
+  cam.ZOOM_POW     = 2.50;
+  cam.ZOOM_MAX     = 0.25;
+  cam.ZOOM_MIN     = 1.80;
+  cam.ROTATION_DEFAULT = PI; // (0 - 2*PI)
+  cam.enableChunks = false;  // Enable/Disable 3D mouse cursor field for continuous object placement
+  cam.init(); // Must End with init() if any BASIC variables within Camera() are changed from default 
+  
+  // Add non-camera UI blockers and edit camera UI characteristics AFTER cam.init()
+  //
+  cam.vs.xpos = width - 3*MARGIN - BAR_W;
+  //cam.hs.enable = false; //disable rotation
+  cam.drag.addBlocker(MARGIN, MARGIN, BAR_W, BAR_H);
+  cam.drag.addBlocker(width - MARGIN - BAR_W, MARGIN, BAR_W, BAR_H);
+  
+  // Turn cam off while still initializing
+  //
+  cam.off();  
 }
 
 void initToolbars() {
@@ -160,15 +166,15 @@ void initToolbars() {
                          "\n\nThresholds: Use 'q', 'w', 'a', and 's' keys to fine-tune thresholds for which to display counts:";
   bar_left.controlY = BAR_Y + bar_left.margin + int(11*bar_left.CONTROL_H);
   
-  bar_left.addSlider("Minimim Count Threshold", "",     0,  int(maxCount),             5, 'q', 'w', true);
-  bar_left.addSlider("Maximum Count Threshold", "",     0,  int(maxCount), int(maxCount), 'a', 's', true);
-  bar_left.addSlider("Visualization Scaler",    "",   -100,             100,           0, 'z', 'x', false);
+  bar_left.addSlider("Minimim Count Threshold", "",     0,  int(maxCount),             5, 1, 'q', 'w', true);
+  bar_left.addSlider("Maximum Count Threshold", "",     0,  int(maxCount), int(maxCount), 1, 'a', 's', true);
+  bar_left.addSlider("Visualization Scaler",    "",   -100,             100,           0, 1, 'z', 'x', false);
   
-  bar_left.addButton("Show Stationary Commutes"   ,   255, true, '1');
-  bar_left.addButton("Show Dynamic Commutes"      ,   #00AA00, true, '2');
-  bar_left.addButton("Show Node IDs"              ,   200, true, '3');
-  bar_left.addButton("Show Roads"                 ,   200, true, '4');
-  bar_left.addButton("3D Edges"                   ,   200, true, '5');
+  bar_left.addRadio("Show Stationary Commutes"   ,   255, true, '1', true);
+  bar_left.addRadio("Show Dynamic Commutes"      ,   #00AA00, true, '2', true);
+  bar_left.addRadio("Show Node IDs"              ,   200, true, '3', true);
+  bar_left.addRadio("Show Roads"                 ,   200, true, '4', true);
+  bar_left.addRadio("3D Edges"                   ,   200, true, '5', true);
   
   // Right Toolbar
   bar_right = new Toolbar(width - (BAR_X + BAR_W), BAR_Y, BAR_W, BAR_H, MARGIN);
@@ -187,7 +193,7 @@ void initToolbars() {
   bar_right.controlY = BAR_Y + bar_right.margin + 2*bar_right.CONTROL_H;
   
   //bar_right.addSlider("Slider 3", "",  1,  100, 1, 'q', 'w', false);
-  //bar_right.addButton("Radio Button 1", 200, true, '1');
+  //bar_right.addRadio("Radio Button 1", 200, true, '1');
 }
 
 void initOD() {
